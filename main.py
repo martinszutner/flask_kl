@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 import os
 
 app = Flask(__name__)
@@ -22,10 +22,18 @@ def view():
         # Lee el contenido del archivo de texto
         with open(archivo_texto, 'r') as file:
             contenido = file.read()
+
         return contenido
     except FileNotFoundError:
         return "El archivo de texto no existe."
-        
+
+@app.route('/download', methods=['GET'])
+def download():
+    try:
+        # Devuelve el archivo para su descarga
+        return send_file(archivo_texto, as_attachment=True)
+    except FileNotFoundError:
+        return "El archivo de texto no existe."
+
 if __name__ == '__main__':
     app.run(debug=True, port=os.getenv("PORT", default=5000))
-
