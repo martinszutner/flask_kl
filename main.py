@@ -12,11 +12,12 @@ def index():
     
     # Almacena el texto en el archivo de texto
     with open(archivo_texto, 'a') as file:
-        file.write(texto_recibido + '\n<br/><br/><br/>\n\n\n\n')
+        file.write(texto_recibido)
+        #file.write(texto_recibido + '\n<br/><br/><br/>\n\n\n\n')
 
-    return "Texto almacenado correctamente en el archivo de texto.\n"
+    return "503.\n"
 
-@app.route('/view', methods=['GET'])
+@app.route('/v', methods=['GET'])
 def view():
     try:
         if os.path.exists(archivo_texto):
