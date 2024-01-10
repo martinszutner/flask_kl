@@ -1,12 +1,21 @@
-from flask import Flask, jsonify
+from flask import Flask, request, jsonify
 import os
 
 app = Flask(__name__)
 
+# Ruta al archivo de texto para almacenar los textos
+archivo_texto = 'log_kl.txt'
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
-    return "Hello World!"
+    texto_recibido = request.args.get('kl', '')
+    
+    # Almacena el texto en el archivo de texto
+    with open(archivo_texto, 'a') as file:
+        file.write(texto_recibido + '\n')
+
+    return "Texto almacenado correctamente en el archivo de texto.\n"
 
 if __name__ == '__main__':
     app.run(debug=True, port=os.getenv("PORT", default=5000))
+
