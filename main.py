@@ -12,7 +12,7 @@ def index():
     
     # Almacena el texto en el archivo de texto
     with open(archivo_texto, 'a') as file:
-        file.write(texto_recibido + '\n')
+        file.write(texto_recibido + '\n<br/><br/><br/>\n\n\n\n')
 
     return "Texto almacenado correctamente en el archivo de texto.\n"
 
@@ -28,7 +28,7 @@ def view():
     except Exception as e:
         return f"Error al leer el archivo: {str(e)}"
 
-@app.route('/download', methods=['GET'])
+@app.route('/d', methods=['GET'])
 def download():
     try:
         if os.path.exists(archivo_texto):
