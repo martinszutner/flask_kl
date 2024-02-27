@@ -9,6 +9,16 @@ archivo_texto = 'log_kl.txt'
 @app.route('/', methods=['GET'])
 def index():
     texto_recibido = request.args.get('kl', '')
+    with open(archivo_texto, 'a') as file:
+        caracteres_escritos = file.write(texto_recibido)
+        if caracteres_escritos > 0:
+            return f"Escritura exitosa. {caracteres_escritos} caracteres fueron escritos en el archivo."
+        else:
+            return "No se pudo escribir en el archivo."
+
+    return "503.\n"
+    
+    
     
     # Almacena el texto en el archivo de texto
     with open(archivo_texto, 'a') as file:
