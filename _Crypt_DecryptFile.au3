@@ -57,7 +57,7 @@ Func Example()
 							For $i = 0 To UBound($aArray) - 1 ; Loop through the array.
 								MsgBox($MB_SYSTEMMODAL, "", DescifrarDesplazamiento($aArray[$i],3)) ; Display the contents of the array.
 							Next
-							Exit Func
+							Exit
 						EndIf
 				Else
 					MsgBox($MB_SYSTEMMODAL, "Error", "Please ensure the relevant information has been entered correctly.")
