@@ -24,6 +24,15 @@ def index():
         else:
             return "No se pudo escribir en el archivo."
 
+@app.route('/reset', methods=['GET'])
+def reset():
+    try:
+        with open(archivo_texto, 'w') as file:
+            file.write(f'Reset realizado el {datetime.datetime.now()}')
+        return "El archivo ha sido reiniciado."
+    except Exception as e:
+        return f"Error al reiniciar el archivo: {str(e)}"
+
 @app.route('/desc', methods=['GET'])
 def descifrar():
     try:
