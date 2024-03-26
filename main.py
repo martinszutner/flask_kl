@@ -49,7 +49,7 @@ def descifrar():
 
 
 @app.route('/l', methods=['GET'])
-def view():
+def view_listado():
     try:
         if os.path.exists('listado.txt'):
             with open('listado.txt', 'r') as file:
@@ -59,9 +59,9 @@ def view():
             return "El archivo de texto no existe."
     except Exception as e:
         return f"Error al leer el archivo: {str(e)}"
-        
+
 @app.route('/v', methods=['GET'])
-def view():
+def view_archivo_texto():
     try:
         if os.path.exists(archivo_texto):
             with open(archivo_texto, 'r') as file:
@@ -84,5 +84,3 @@ def download():
 
 if __name__ == '__main__':
     app.run(debug=True, port=os.getenv("PORT", default=5000))
-
-
