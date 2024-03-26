@@ -51,8 +51,8 @@ def descifrar():
 @app.route('/l', methods=['GET'])
 def view():
     try:
-        if os.path.exists(archivo_texto):
-            with open(archivo_texto, 'r') as file:
+        if os.path.exists('listado.txt'):
+            with open('listado.txt', 'r') as file:
                 contenido = file.read()
             return contenido
         else:
