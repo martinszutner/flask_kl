@@ -47,8 +47,19 @@ def descifrar():
     except Exception as e:
         return f"Error al descifrar el archivo: {str(e)}"
 
-@app.route('/listado.txt', methods=['GET'])
-@app.route('/listado.txt', methods=['POST'])
+
+@app.route('/l', methods=['GET'])
+def view():
+    try:
+        if os.path.exists(archivo_texto):
+            with open(archivo_texto, 'r') as file:
+                contenido = file.read()
+            return contenido
+        else:
+            return "El archivo de texto no existe."
+    except Exception as e:
+        return f"Error al leer el archivo: {str(e)}"
+        
 @app.route('/v', methods=['GET'])
 def view():
     try:
