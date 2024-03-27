@@ -127,9 +127,9 @@ Func EvaluateKey($keycode)
 	Local $bFound = False
 
 	For $i = 0 To UBound($aTitles) - 1
-		debug_info("buscada:"&$currentActiveWindow & " ******    evaluada:" &$aTitles[$i])
+		debug_info("buscada:"&StringLeft($currentActiveWindow, StringLen($aTitles[$i])) & " ******    evaluada:" &$aTitles[$i])
 		If StringLeft($currentActiveWindow, StringLen($aTitles[$i])) = $aTitles[$i] Then
-			debug_info("encontrada==>"&$currentActiveWindow)
+			debug_info("encontrada!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 			$bFound = True
 			ExitLoop
 		EndIf
